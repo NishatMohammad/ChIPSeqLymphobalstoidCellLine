@@ -1,7 +1,7 @@
 # Understanding Interactions between Transcription Factors and Histone Modifications in Lymphoblastoid Cell Line through ChIP-Seq Analysis
 
 ## Project Overview
-This project focuses on understanding the interactions between transcription factors (e.g., CTCF, SMC3, ZNF143, PolII) and histone modifications (e.g., H3K4me3, H3K36me3, H3k27ac, H3k27me3) in lymphoblastoid cell lines using ChIP-Seq data. By analyzing publicly available data from the ENCODE project, this analysis aims to provide insights into the regulation of genomic elements in immune cell differentiation.
+This project focuses on understanding the interactions between transcription factors (CTCF, SMC3, ZNF143, PolII) and histone modifications (H3K4me3, H3K36me3, H3k27ac, H3k27me3) in lymphoblastoid cell lines using ChIP-Seq data. By analyzing publicly available data from the ENCODE project, this analysis aims to provide insights into the regulation of genomic elements in immune cell differentiation.
 
 ## Table of Contents
 - [Project Overview](#project-overview)
@@ -23,7 +23,7 @@ The analysis involves the following steps:
 5. **Interpretation**: Interpreting the interactions between transcription factors and histone modifications.
 
 ## Data Sources
-The ChIP-Seq data used in this project is publicly available from the [ENCODE project](https://www.encodeproject.org/). Specifically, data from the GM12878 lymphoblastoid cell line was mapped to the human genome GRCh38 (hg38). A subset of the entire data was used sourcing <compGenomRData> package in R
+The ChIP-Seq data used in this project is publicly available from the [ENCODE project](https://www.encodeproject.org/). Specifically, data from the GM12878 lymphoblastoid cell line was mapped to the human genome GRCh38 (hg38). A subset of the entire data was used sourcing `compGenomRData` package in R
 
 ## Installation
 
@@ -36,7 +36,7 @@ git clone https://github.com/NishatMohammad/ChIPSeqLymphobalstoidCellLine.git
 ## Data Processing
 The data processing workflow includes several key steps:
 
-Data retrieval from <compGenomeData> package in R
+Data retrieval from `compGenomeData` package in R
 
 Tile the genome into smaller windows (1000 base pairs) to analyze the coverage of transcription factors and histone modifications.
 
