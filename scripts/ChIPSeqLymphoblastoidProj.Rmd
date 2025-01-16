@@ -14,7 +14,7 @@ output:
 
 ## Load Necessary packages  
 
-```{r message=FALSE, warning=FALSE}
+```{r package_load, message=FALSE, warning=FALSE}
 library(compGenomRData)
 library(GenomeInfoDb)
 library(GenomicRanges)
@@ -22,7 +22,7 @@ library(GenomicAlignments)
 
 library(pheatmap)
 library(rtracklayer)
-#library(Gviz)
+library(Gviz)
 library(ggplot2)
 
 library(BSgenome.Hsapiens.UCSC.hg38)
@@ -44,7 +44,7 @@ ChIP-Seq has empowered such analysis and this project is highly dependent on thi
 
 Experimental data is from the public ENCODE (ENCODE Project Consortium 2012) database of ChIP-seq experiments. This Project focuses on human chromosome 21 (chr21) data only for lymphoblastoid cell line, GM12878, mapped to the GRCh38 (hg38).
 
-```{r message=FALSE, warning=FALSE}
+```{r EDA_data_processing, message=FALSE, warning=FALSE}
 chipseq_data_path = system.file('extdata/chip-seq',package='compGenomRData')
 chipseq_files = list.files(chipseq_data_path, full.names=TRUE)
 
@@ -52,7 +52,7 @@ chipseq_files = list.files(chipseq_data_path, full.names=TRUE)
 
 ### 2.1 Clustering the Data  
 
-```{r message=FALSE, warning=FALSE}
+```{r data_clustering, message=FALSE, warning=FALSE}
 # Get chromosome lengths for hg38
 hg_chromosomes = getChromInfoFromUCSC('hg38')
 
@@ -65,7 +65,7 @@ Load the data from the `GenomeInfoDb` and take up Chromosome 21 from Human Genom
 
 ### 2.2 Create GRanges Object  
 
-```{r message=FALSE, warning=FALSE}
+```{r granges_obj, message=FALSE, warning=FALSE}
 # Change Chromosome length data frame into vector called seqlen
 seqlen = with(hg_chromosome21_len, setNames(size, chrom))
 
@@ -84,7 +84,7 @@ The table above shows details of the GRanges object.
 
 ### 2.3 Count number of Reads  
 
-```{r message=FALSE, warning=FALSE}
+```{r no_of_reads, message=FALSE, warning=FALSE}
 # Get bam files
 bam_file_List = list.files(path = chipseq_data_path, full.names = TRUE, 
                            pattern = 'bam$')
@@ -117,7 +117,7 @@ Tiles without overlap are removed and the Prefix `GM12878_hg38_` is removed.
 
 ### 2.5 Pearson Correlation  
 
-```{r message=FALSE, warning=FALSE}
+```{r correlation, message=FALSE, warning=FALSE}
 # Get pearson correlation between samples
 correlation_matrix = cor(cpm, method='pearson')
 
@@ -142,7 +142,7 @@ The pairwise Pearson correlation coefficient is calculated using the `cor()` fun
 
 Visualizing ChIP-Seq data in a genome browser is a crucial step in quality assessment and preliminary analysis. Genome browsers like IGV and UCSC represent the genome as a one-dimensional coordinate system, allowing comparison of genomic annotations and experimental data in formats such as BAM, BED, and bigWig. To simplify visualization and reduce computational load, signal profiles summarizing read enrichment are generated as coverage vectors. In R, this involves importing BAM files using the `GenomicAlignments` package, converting reads to genomic ranges, extending them to an average fragment size (take 200 bp), and calculating coverage vectors with the `coverage()` function. The resulting data is exported as a bigWig file using the `rtracklayer` package. The `Gviz` package can create browser-like visualizations with customizable tracks, such as genome axis and signal profiles, plotted using the `plotTracks()` function.  
 
-```{r message=FALSE, warning=FALSE}
+```{r visualize_browser, message=FALSE, warning=FALSE}
 # Get ChIp-Seq Samples
 bam_file_List2 = list.files(
     path       = chipseq_data_path, 
@@ -172,22 +172,22 @@ export.bw(cov, (sub('.bam','.bigWig', chip_file)))
 
 
 # Get genome axis track
-#axis   = GenomeAxisTrack(
-#    range = GRanges('chr21', IRanges(1, width=seqlen)))
+axis= GenomeAxisTrack(
+  range = GRanges('chr21', IRanges(1, width=seqlen)))
 
 # Change signal into genomic ranges to get signal track
-#gcov   = as(cov, 'GRanges')
-#dtrack = DataTrack(gcov, name = "CTCF", type='l')
+gcov   = as(cov, 'GRanges')
+dtrack = DataTrack(gcov, name = "CTCF", type='l')
 
 # Get track ordering
-#track_list = list(axis,dtrack)
+track_list = list(axis,dtrack)
 
 # Plot tracks
-#plotTracks(
-#    trackList        = track_list, 
-#    sizes            = c(.1,1), 
-#    background.title = "black"
-#)
+plotTracks(
+    trackList        = track_list, 
+    sizes            = c(.1,1), 
+    background.title = "black"
+)
 
 ```
 
@@ -196,7 +196,7 @@ export.bw(cov, (sub('.bam','.bigWig', chip_file)))
 
 Cross-correlation between plus and minus strands quantifies whether the DNA library was enriched for fragments of specific lengths, a key indicator of ChIP-seq success. This is achieved by calculating the correlation between signal profiles of reads on the + and - strands, shifting the + strand incrementally by 1–400 base pairs. The peak of the resulting correlation curve corresponds to the average fragment length, indicating whether the ChIP enriched for fragments of a particular size.  
 
-```{r message=FALSE, warning=FALSE}
+```{r strand_cross_cor, message=FALSE, warning=FALSE}
 # load reads
 reads3 = readGAlignments(chip_file)
 reads3 = granges(reads3)
@@ -231,7 +231,7 @@ cc = shiftApply(
 
 # Get results to data frame
 cc = data.frame(fragment_size = wsize, cross_correlation = cc)
-
+head(cc)
 #Visualize with ggplot2
 ggplot(data = cc, aes(fragment_size, cross_correlation)) +
   geom_point() +
@@ -255,7 +255,7 @@ To compute this efficiently, the signal profiles are simplified into Boolean vec
 
 ### 4.1 GC Bias Quantification  
 
-```{r message=FALSE, warning=FALSE}
+```{r gc_bias_quant, message=FALSE, warning=FALSE}
 # Get Data
 hg_chrs = getChromInfoFromUCSC('hg38')
 hg_chrs = subset(hg_chrs, grepl('chr21$',chrom))
@@ -317,7 +317,7 @@ GC bias in ChIP experiments, often introduced during PCR amplification, can be e
 
 ### 4.2 Account for Batch Effects  
 
-```{r message=FALSE, warning=FALSE}
+```{r batch_effects, message=FALSE, warning=FALSE}
 # Reorder columns
 gcd = pivot_longer(
     data      = gc, 
@@ -355,7 +355,7 @@ Comparing plots across experiments helps identify and address batch effects when
 Visualizing the genomic distribution of reads across functional regions provides insight into ChIP quality. Specific enrichment is indicated when ChIP samples differ from Input samples and align with prior knowledge of protein localization, such as H3K36me3 reads predominantly in gene bodies. To handle overlapping genomic features, a hierarchical annotation system prioritizes categories (e.g., TSS > exon > intron > intergenic) to resolve ambiguities. Genomic annotations are obtained from databases like Ensembl using tools like AnnotationHub. For example, annotations for the hg38 genome are retrieved, updated for UCSC-style chromosome names, and subset for specific regions (e.g., chromosome 21) before defining a hierarchy for functional regions like TSS, exons, and introns.  
 
 
-```{r message=FALSE, warning=FALSE}
+```{r anotation, message=FALSE, warning=FALSE}
 # connect to the hub object
 hub = AnnotationHub()
 
@@ -395,7 +395,7 @@ Annotations are then organized hierarchically into categories such as transcript
 
 ### 5.1 Annotate Reads  
 
-```{r message=FALSE, warning=FALSE}
+```{r reads_ano, message=FALSE, warning=FALSE}
 annotateReads = function(bam_file, annotation_list){
     
     library(dplyr)
@@ -483,7 +483,7 @@ The analysis highlights notable patterns, such as increased H3K36me3 reads in ex
 
 ## Conclusion  
 
-This Project investigated the interactions between transcription factors (CTCF, SMC3, ZNF143, PolII) and histone modifications (H3K4me3, H3K36me3, H3K27ac, H3K27me3) in GM12878 cells using ChIP-Seq data. Key findings reveal strong co-localization between CTCF and SMC3, suggesting they function together in chromatin loops, while PolII and ZNF143 show variable correlations, indicating distinct transcriptional roles. Active histone marks like H3K4me3 and H3K27ac are enriched at promoters and enhancers, whereas H3K27me3 is linked to repressed regions. The analysis also confirmed dataset quality through strand cross-correlation and GC bias checks, with genome browser views illustrating the spatial distribution of these marks on chromosome 21. These insights improve our understanding of transcriptional regulation and chromatin structure in GM12878 cells.  
+This concludes the QC steps and investigated the interactions between transcription factors (CTCF, SMC3, ZNF143, PolII) and histone modifications (H3K4me3, H3K36me3, H3K27ac, H3K27me3) in GM12878 cells using ChIP-Seq data. Key findings reveal strong co-localization between CTCF and SMC3, suggesting they function together in chromatin loops, while PolII and ZNF143 show variable correlations, indicating distinct transcriptional roles. Active histone marks like H3K4me3 and H3K27ac are enriched at promoters and enhancers, whereas H3K27me3 is linked to repressed regions. The analysis also confirmed dataset quality through strand cross-correlation and GC bias checks, with genome browser views illustrating the spatial distribution of these marks on chromosome 21. These insights improve our understanding of transcriptional regulation and chromatin structure in GM12878 cells. The next step will be Peak calling.  
 
 
 ## References  
