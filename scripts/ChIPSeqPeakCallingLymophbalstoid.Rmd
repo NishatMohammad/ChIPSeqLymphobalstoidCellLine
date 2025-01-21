@@ -3,12 +3,12 @@ title: "Peak Calling Lymphoblastoid Cell Line"
 author: "Dr. Nishat Mohammad"
 date: "2025-01-06"
 output:
+  pdf_document:
+    latex_engine: xelatex
   html_document:
     toc: true
     toc_float: true
     code_folding: show
-  pdf_document:
-    latex_engine: xelatex
 ---
 
 
@@ -239,8 +239,9 @@ ctcf_peaks = subset(ctcf_peaks, qvalue < 0.01)
 ctcf_peaks = ctcf_peaks[order(ctcf_peaks$qvalue)]
 
 # write   peaks loacations into a txt table
-write.table(ctcf_peaks, file.path(data_path, 'CTCF_peaks.txt'), 
-            row.names=F, col.names=T, quote=F, sep='\t')
+#write.table(ctcf_peaks, file.path(data_path, 'CTCF_peaks.txt'), 
+#            row.names=F, col.names=T, quote=F, sep='\t')
+write.csv(ctcf_peaks, "../results/ctcf_peaks.csv", row.names = FALSE)
 
 # find enriched tilling windows
 enriched_regions = countOverlaps(tilling_window, ctcf_peaks) > 0

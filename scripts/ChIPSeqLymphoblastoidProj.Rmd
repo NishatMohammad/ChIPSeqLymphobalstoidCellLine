@@ -4,12 +4,12 @@ title: "Understanding Interactions between Transcription Factors and Histone Mod
 author: "Dr. Nishat Fatima Mohammad"
 date: "2025-01-02"
 output:
+  pdf_document:
+    latex_engine: xelatex
   html_document:
     toc: true
     toc_float: true
     code_folding: show
-  pdf_document:
-    latex_engine: xelatex
 ---
 
 ## Load Necessary packages  
